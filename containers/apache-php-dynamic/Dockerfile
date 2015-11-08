@@ -1,4 +1,4 @@
-# Start with Ubuntu base
+#Start with Ubuntu base
 FROM ubuntu:12.10
 
 # Credit
@@ -16,7 +16,8 @@ RUN apt-get install -y php5 \
 	php5-mcrypt \
 	php5-xdebug \
 	php-apc \
-	libapache2-mod-php5
+	libapache2-mod-php5 \
+        libapache2-mod-proxy-html
 
 # Clean up after install
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -27,7 +28,7 @@ ENV APACHE_RUN_GROUP www-data
 ENV APACHE_LOG_DIR /var/log/apache2
 
 # Make sure all the desired apache modules are on
-RUN a2enmod ssl headers rewrite vhost_alias
+RUN a2enmod ssl headers rewrite vhost_alias proxy proxy_http
 
 # Set up remote debugging for xdebug
 RUN mkdir /var/run/apache2
@@ -41,9 +42,13 @@ ADD dynamic-vhost.conf /etc/apache2/sites-available/dynamic
 ADD setDocRoot.php /etc/apache2/includes/
 RUN a2dissite default && a2ensite dynamic
 
+# Add nameserver
+RUN echo nameserver 33.33.33.1 > /etc/resolv.conf
+
 # Run apache on standard ports
 EXPOSE 80 443
 
 ENTRYPOINT ["/usr/sbin/apache2ctl"]
 
 CMD ["-D", "FOREGROUND"]
+

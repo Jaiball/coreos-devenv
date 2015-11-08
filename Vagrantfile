@@ -22,5 +22,7 @@ Vagrant.configure("2") do |config|
 	# config.vm.provision
 	config.vm.provision "shell",
 		path: ".coreos-devenv/scripts/provision-docker.sh"
-
+	
+	# Fix ssh issue
+	config.ssh.insert_key = false
 end
